@@ -6,6 +6,11 @@ default_path = os.path.abspath("./output") + "/"
 docs_path = os.path.abspath("./output/docs") + "/"  # Path for documentation
 
 
+def ensure_directory_exists(path: str):
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+
 def register_tools(user_proxy: UserProxyAgent, project_manager: AssistantAgent, coding_agent: AssistantAgent, testing_agent: AssistantAgent):
     # Tools for Project Manager
     @user_proxy.register_for_execution()
@@ -14,9 +19,17 @@ def register_tools(user_proxy: UserProxyAgent, project_manager: AssistantAgent, 
         filename: Annotated[str, "Name and path of documentation file to create."],
         content: Annotated[str, "Content to write in the documentation file."]
     ) -> Annotated[Tuple[int, str], "Status code and message."]:
-        with open(docs_path + filename, "w", encoding="utf-8") as file:
-            file.write(content)
-        return 0, "Documentation file created successfully"
+        try:
+            ensure_directory_exists(docs_path)
+            with open(docs_path + filename, "w", encoding="utf-8") as file:
+                file.write(content)
+            return 0, "Documentation file created successfully"
+        except FileNotFoundError:
+            return 1, "Error: Directory not found."
+        except PermissionError:
+            return 1, "Error: Permission denied."
+        except IOError as e:
+            return 1, f"IOError: {str(e)}"
 
     @user_proxy.register_for_execution()
     @project_manager.register_for_llm(description="List documentation files in the docs directory.")
