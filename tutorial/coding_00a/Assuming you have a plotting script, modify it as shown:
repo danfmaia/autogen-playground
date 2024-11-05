@@ -1,0 +1,26 @@
+# Assuming you have a plotting script, modify it as shown:
+
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# Example data
+dates = pd.date_range(start='2023-01-01', periods=10, freq='D')
+values = range(10)
+
+plt.figure(figsize=(10, 5))
+plt.plot(dates, values)
+
+# Rotating x-axis date labels to prevent overlap
+plt.xticks(rotation=45)  # Rotate the date labels by 45 degrees
+
+# Adding margin space to x-axis labels
+plt.gcf().autofmt_xdate()
+
+plt.xlabel('Date')
+plt.ylabel('Values')
+plt.title('Sample Plot with Date on X-axis')
+plt.tight_layout()  # Adjust layout to prevent clipping of tick-labels
+
+plt.savefig('plot.png')  # Save the adjusted plot
+
+print("The x-axis labels have been adjusted to prevent overlap. The updated plot has been saved as 'plot.png'.")
