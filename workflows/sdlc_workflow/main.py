@@ -32,18 +32,13 @@ manager = GroupChatManager(
 ##################
 chat_result = user_proxy.initiate_chat(
     manager,
-    message="""
-Create a React app that is a simple todo list.
-""",
+    message="Create a React app that is a simple todo list."
 )
 
-##################
-# Save the chat result to a file #
-##################
-output_file_path = os.path.join("output", "chat_results.txt")
-os.makedirs(os.path.dirname(output_file_path), exist_ok=True)
+# Save the chat result to a file in the current directory
+OUTPUT_FILE_PATH = "chat_results.txt"
 
-with open(output_file_path, "w", encoding="utf-8") as file:
+with open(OUTPUT_FILE_PATH, "w", encoding="utf-8") as file:
     file.write("Chat Summary:\n")
     file.write(chat_result.summary + "\n\n")
     file.write("Chat History:\n")
