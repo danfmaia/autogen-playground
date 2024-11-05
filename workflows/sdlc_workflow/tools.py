@@ -1,9 +1,12 @@
 import os
-from typing_extensions import Annotated, List, Tuple
+import json
+from typing_extensions import Annotated, List, Tuple, Dict
 from autogen import UserProxyAgent, AssistantAgent
+import subprocess
 
 default_path = os.path.abspath("./output") + "/"
 docs_path = os.path.abspath("./output/docs") + "/"  # Path for documentation
+PROJECT_CONTEXT_PATH = os.path.join(docs_path, "project_context.json")
 
 
 def ensure_directory_exists(path: str):
@@ -11,8 +14,73 @@ def ensure_directory_exists(path: str):
         os.makedirs(path)
 
 
+def load_project_context() -> Dict:
+    """Load project context from file if it exists."""
+    try:
+        if os.path.exists(PROJECT_CONTEXT_PATH):
+            with open(PROJECT_CONTEXT_PATH, 'r', encoding='utf-8') as f:
+                return json.load(f)
+    except FileNotFoundError:
+        print("Project context file not found")
+    except PermissionError:
+        print("Permission denied when accessing project context file")
+    except json.JSONDecodeError as e:
+        print(f"Error decoding project context JSON: {e}")
+    except IOError as e:
+        print(f"IO Error when reading project context: {e}")
+
+    return {
+        "name": "",
+        "description": "",
+        "tech_stack": [],
+        "features": [],
+        "current_state": {}
+    }
+
+
+def save_project_context(context: Dict) -> None:
+    """Save project context to file."""
+    ensure_directory_exists(os.path.dirname(PROJECT_CONTEXT_PATH))
+    with open(PROJECT_CONTEXT_PATH, 'w', encoding='utf-8') as f:
+        json.dump(context, f, indent=2)
+
+
 def register_tools(user_proxy: UserProxyAgent, project_manager: AssistantAgent, coder_agent: AssistantAgent, tester_agent: AssistantAgent):
+    # Load and inject project context into Project Manager's system message
+    context = load_project_context()
+    project_manager.update_system_message(f"""
+{project_manager.system_message}
+
+Current Project Context:
+- Project Name: {context.get('name')}
+- Description: {context.get('description')}
+- Tech Stack: {', '.join(context.get('tech_stack', []))}
+- Implemented Features: {', '.join(context.get('features', []))}
+""")
+
     # Tools for Project Manager
+    @user_proxy.register_for_execution()
+    @project_manager.register_for_llm(description="Update project context with new information.")
+    def update_project_context(
+        updates: Annotated[Dict,
+                           "Dictionary containing updates to project context"]
+    ) -> Annotated[Tuple[int, str], "Status code and message."]:
+        try:
+            context = load_project_context()
+            context.update(updates)
+            save_project_context(context)
+            return 0, "Project context updated successfully"
+        except FileNotFoundError:
+            return 1, "Error: Project context file not found"
+        except PermissionError:
+            return 1, "Error: Permission denied when accessing project context"
+        except json.JSONDecodeError as e:
+            return 1, f"Error decoding project context JSON: {str(e)}"
+        except IOError as e:
+            return 1, f"IO Error when updating project context: {str(e)}"
+        except TypeError as e:
+            return 1, f"Type Error: Invalid update data format: {str(e)}"
+
     @user_proxy.register_for_execution()
     @project_manager.register_for_llm(description="Create a documentation file.")
     def create_doc_file(
@@ -155,11 +223,21 @@ def register_tools(user_proxy: UserProxyAgent, project_manager: AssistantAgent, 
         except IOError as e:
             return 1, f"IOError: {str(e)}"
 
-    # Tools for Tester Agent
+    # Shared tool for Coder and Tester Agents
     @user_proxy.register_for_execution()
-    @tester_agent.register_for_llm(description="Execute bash command.")
+    @coder_agent.register_for_llm(description="Prepare bash commands for execution.")
+    @tester_agent.register_for_llm(description="Execute test commands.")
     def execute_command(
         command: Annotated[str, "Command to execute."]
     ) -> Annotated[Tuple[int, str], "Status code and message."]:
-        os.system(f"CI=true cd {default_path} && {command}")
-        return 0, "Command executed successfully"
+        try:
+            os.system(f"CI=true cd {default_path} && {command}")
+            return 0, "Command executed successfully"
+        except FileNotFoundError:
+            return 1, "Error: Command or directory not found"
+        except PermissionError:
+            return 1, "Error: Permission denied"
+        except subprocess.SubprocessError as e:
+            return 1, f"Subprocess Error: {str(e)}"
+        except OSError as e:
+            return 1, f"OS Error: {str(e)}"

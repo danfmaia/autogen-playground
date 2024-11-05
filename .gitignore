@@ -3,3 +3,7 @@ output
 OAI_CONFIG_LIST.json
 cl_output.txt
 chat_results.txt
+
+__pycache__/
+*.py[cod]
+*$py.class

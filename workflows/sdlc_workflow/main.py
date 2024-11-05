@@ -32,7 +32,7 @@ manager = GroupChatManager(
 ##################
 chat_result = user_proxy.initiate_chat(
     manager,
-    message="Create a React app that is a simple todo list."
+    message="How to initialize the app?"
 )
 
 # Save the chat result to a file in the current directory
