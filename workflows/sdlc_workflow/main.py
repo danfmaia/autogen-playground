@@ -4,7 +4,7 @@ from agents import user_proxy, project_manager, coding_agent, testing_agent
 from tools import register_tools
 
 # Register tools for execution
-register_tools(user_proxy, coding_agent)
+register_tools(user_proxy, project_manager, coding_agent, testing_agent)
 
 ##################
 # Set up the chat #
