@@ -1,16 +1,16 @@
 import os
 from autogen import GroupChat, GroupChatManager
-from agents import user_proxy, project_manager, coding_agent, testing_agent
+from agents import user_proxy, project_manager, coder_agent, tester_agent
 from tools import register_tools
 
 # Register tools for execution
-register_tools(user_proxy, project_manager, coding_agent, testing_agent)
+register_tools(user_proxy, project_manager, coder_agent, tester_agent)
 
 ##################
 # Set up the chat #
 ##################
 groupchat = GroupChat(
-    agents=[user_proxy, project_manager, coding_agent, testing_agent],
+    agents=[user_proxy, project_manager, coder_agent, tester_agent],
     messages=[],
     max_round=100,
     send_introductions=True,

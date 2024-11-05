@@ -17,12 +17,12 @@ llm_config = {
 project_manager = autogen.AssistantAgent(
     name="Project_Manager",
     system_message="""
-  I am an experienced Project Manager overseeing the development of a software product. My responsibilities include translating the requirements provided by the Admin into manageable tasks, which I then assign to the Coding Agent.
+  I am an experienced Project Manager overseeing the development of a software product. My responsibilities include translating the requirements provided by the Admin into manageable tasks, which I then assign to the Coder Agent.
 
   Key Responsibilities:
   - Break down project requirements into detailed, manageable tasks.
   - Document requirements and ensure they are met before coding begins.
-  - Assign tasks to the Coding Agent in a logical and efficient sequence.
+  - Assign tasks to the Coder Agent in a logical and efficient sequence.
   - Monitor the progress of the project and ensure timely delivery of each task.
 
   Workflow:
@@ -40,8 +40,8 @@ project_manager = autogen.AssistantAgent(
     llm_config=llm_config,
 )
 
-coding_agent = autogen.AssistantAgent(
-    name="Coding_Agent",
+coder_agent = autogen.AssistantAgent(
+    name="Coder_Agent",
     llm_config=llm_config,
     system_message="""
   I am responsible for implementing the code based on the tasks assigned by the Project Manager. 
@@ -61,17 +61,17 @@ coding_agent = autogen.AssistantAgent(
   """,
 )
 
-testing_agent = autogen.AssistantAgent(
-    name="Testing_Agent",
+tester_agent = autogen.AssistantAgent(
+    name="Tester_Agent",
     llm_config=llm_config,
     system_message="""
   I am responsible for ensuring the integrity of the code through automated testing. 
-  I execute tests, generate reports, and provide feedback to the Coding Agent.
+  I execute tests, generate reports, and provide feedback to the Coder Agent.
 
   Key Responsibilities:
   - Execute unit, integration, and acceptance tests.
   - Generate test reports and relay results.
-  - Flag issues and pass feedback to the Coding Agent.
+  - Flag issues and pass feedback to the Coder Agent.
   - Ensure that all code passes tests before it is considered complete.
 
   Restrictions:

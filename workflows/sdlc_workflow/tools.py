@@ -11,7 +11,7 @@ def ensure_directory_exists(path: str):
         os.makedirs(path)
 
 
-def register_tools(user_proxy: UserProxyAgent, project_manager: AssistantAgent, coding_agent: AssistantAgent, testing_agent: AssistantAgent):
+def register_tools(user_proxy: UserProxyAgent, project_manager: AssistantAgent, coder_agent: AssistantAgent, tester_agent: AssistantAgent):
     # Tools for Project Manager
     @user_proxy.register_for_execution()
     @project_manager.register_for_llm(description="Create a documentation file.")
@@ -85,9 +85,9 @@ def register_tools(user_proxy: UserProxyAgent, project_manager: AssistantAgent, 
         except IOError as e:
             return 1, f"IOError: {str(e)}"
 
-    # Tools for Coding Agent
+    # Tools for Coder Agent
     @user_proxy.register_for_execution()
-    @coding_agent.register_for_llm(description="List files in chosen directory.")
+    @coder_agent.register_for_llm(description="List files in chosen directory.")
     def list_dir(
         directory: Annotated[str, "Directory to check."]
     ) -> Annotated[Tuple[int, List[str]], "Status code and list of files"]:
@@ -103,7 +103,7 @@ def register_tools(user_proxy: UserProxyAgent, project_manager: AssistantAgent, 
             return 1, f"IOError: {str(e)}"
 
     @user_proxy.register_for_execution()
-    @coding_agent.register_for_llm(description="Check the contents of a chosen file.")
+    @coder_agent.register_for_llm(description="Check the contents of a chosen file.")
     def see_file(
         filename: Annotated[str, "Name and path of file to check."]
     ) -> Annotated[Tuple[int, str], "Status code and file contents."]:
@@ -121,7 +121,7 @@ def register_tools(user_proxy: UserProxyAgent, project_manager: AssistantAgent, 
             return 1, f"IOError: {str(e)}"
 
     @user_proxy.register_for_execution()
-    @coding_agent.register_for_llm(description="Replaces all the code within a file with new one. Proper indentation is important.")
+    @coder_agent.register_for_llm(description="Replaces all the code within a file with new one. Proper indentation is important.")
     def modify_code(
         filename: Annotated[str, "Name and path of file to change."],
         new_code: Annotated[str, "New piece of code to replace old code with. Remember about providing indents."],
@@ -138,7 +138,7 @@ def register_tools(user_proxy: UserProxyAgent, project_manager: AssistantAgent, 
             return 1, f"IOError: {str(e)}"
 
     @user_proxy.register_for_execution()
-    @coding_agent.register_for_llm(description="Create a new file with code.")
+    @coder_agent.register_for_llm(description="Create a new file with code.")
     def create_file_with_code(
         filename: Annotated[str, "Name and path of file to create."],
         code: Annotated[str, "Code to write in the file."]
@@ -155,9 +155,9 @@ def register_tools(user_proxy: UserProxyAgent, project_manager: AssistantAgent, 
         except IOError as e:
             return 1, f"IOError: {str(e)}"
 
-    # Tools for Testing Agent
+    # Tools for Tester Agent
     @user_proxy.register_for_execution()
-    @testing_agent.register_for_llm(description="Execute bash command.")
+    @tester_agent.register_for_llm(description="Execute bash command.")
     def execute_command(
         command: Annotated[str, "Command to execute."]
     ) -> Annotated[Tuple[int, str], "Status code and message."]:
