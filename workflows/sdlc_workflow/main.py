@@ -32,7 +32,7 @@ manager = GroupChatManager(
 ##################
 chat_result = user_proxy.initiate_chat(
     manager,
-    message="How to initialize the app?"
+    message="Explore the project docs and write a README file."
 )
 
 # Save the chat result to a file in the current directory
