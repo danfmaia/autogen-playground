@@ -1,7 +1,10 @@
 output/
+coding*/
 __pycache__/
 .cache
 *.py[cod]
 *$py.class
 cl_output.txt
 chat_results.txt
+autogen_agencies/
+dlai_course/.env
